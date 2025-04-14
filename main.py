@@ -1,7 +1,7 @@
-from time import time, localtime
+from time import localtime
 from datetime import timedelta
 import requests
-
+import time
 import cityinfo
 import config
 from requests import get, post
@@ -19,31 +19,6 @@ def get_access_token():
     # print(access_token)
     return access_token
 
-
-# def get_weather(province, city):
-#     # 城市id
-#     city_id = cityinfo.cityInfo[province][city]["AREAID"]
-#     # 毫秒级时间戳
-#     t = (int(round(time() * 1000)))
-#     headers = {
-#       "Referer": "http://www.weather.com.cn/weather1d/{}.shtml".format(city_id),
-#       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-#                     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-#     }
-#     url = "http://d1.weather.com.cn/dingzhi/{}.html?_={}".format(city_id, t)
-#     response = get(url, headers=headers)
-#     response.encoding = "utf-8"
-#     response_data = response.text.split(";")[0].split("=")[-1]
-#     response_json = eval(response_data)
-#     # print(response_json)
-#     weatherinfo = response_json["weatherinfo"]
-#     # 天气
-#     weather = weatherinfo["weather"]
-#     # 最高气温
-#     temp = weatherinfo["temp"]
-#     # 最低气温
-#     tempn = weatherinfo["tempn"]
-#     return weather, temp, tempn
 
 
 def get_weather(tomorrow='2025-04-13'):
@@ -161,15 +136,28 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         print(response.text)
 
 
-# 获取accessToken
-accessToken = get_access_token()
-# 接收的用户
-user = config.user
-# 传入省份和市获取天气信息
-province, city = config.province, config.city
-weather, max_temperature, min_temperature = get_weather()
-# 获取词霸每日金句
-note_ch, note_en = get_ciba()
-print(note_ch)
-# 公众号推送消息
-send_message(user, accessToken, city, weather, max_temperature, min_temperature, note_ch, note_en)
+def main():
+    # 获取accessToken
+    accessToken = get_access_token()
+    # 接收的用户
+    user = config.user
+    # 传入省份和市获取天气信息
+    province, city = config.province, config.city
+    weather, max_temperature, min_temperature = get_weather()
+    # 获取词霸每日金句
+    note_ch, note_en = get_ciba()
+    print(note_ch)
+    # 公众号推送消息
+    send_message(user, accessToken, city, weather, max_temperature, min_temperature, note_ch, note_en)
+def check_time(target_hour=22, target_minute=29):
+    while True:
+        now = datetime.now()
+        if now.hour == target_hour and now.minute == target_minute:
+            print(f"now time is {target_hour}:{target_minute}")
+            main()
+            time.sleep(60)
+
+        time.sleep(5)
+
+if __name__ == '__main__':
+    check_time()
